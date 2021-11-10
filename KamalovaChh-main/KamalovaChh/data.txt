@@ -1,0 +1,17 @@
+2
+Pipe
+rrrrr
+1111
+111
+0
+Pipe
+ttt
+222
+222
+0
+1
+CompressionStation
+jjjj
+333
+333
+3

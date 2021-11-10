@@ -1,0 +1,4 @@
+﻿  KamalovaChh.cpp
+C:\Users\Huawei\OneDrive\Рабочий стол\KamalovaChh-main\KamalovaChh\KamalovaChh.cpp(215,53): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+C:\Users\Huawei\OneDrive\Рабочий стол\KamalovaChh-main\KamalovaChh\KamalovaChh.cpp(222,54): warning C4267: аргумент: преобразование из "size_t" в "int"; возможна потеря данных
+  Project2.vcxproj -> C:\Users\Huawei\OneDrive\Рабочий стол\KamalovaChh-main\KamalovaChh\x64\Debug\KamalovaCh.exe

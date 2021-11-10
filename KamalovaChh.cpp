@@ -16,6 +16,7 @@ void Menu()
 		<< "  5. Редактировать КС" << endl
 		<< "  6. Сохранить" << endl
 		<< "  7. Загрузить" << endl
+	    << "  8. Найти трубу по имени" << endl
 		<< "  0. Выход" << endl
 		<< "  Выберите действие: ";
 }
@@ -222,6 +223,28 @@ CompressionStation& SelectCompressionStation(vector<CompressionStation>& gr)
 		unsigned int index = GetCorrectNumber(1u, gr.size());
 		return gr[index - 1];
 }
+
+using Filter = bool(*)(const Pipe& p, string param);
+
+bool CheckByName(const Pipe& p, string param)
+{
+	return p.name == param;
+}
+
+vector<int> FindPipeByFilter(const vector<Pipe>& group,Filter f, string name)
+{
+	vector <int> res;
+	int i = 0;
+	for (auto& p : group)
+	{
+		if (f(p,name))
+			res.push_back(i);
+		i++;
+	}
+
+	return res;
+}
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -234,7 +257,7 @@ int main()
 	{
 		Menu();
 
-		switch (GetCorrectNumber(0, 7))
+		switch (GetCorrectNumber(0, 8))
 		{
 		case 0:
 		{
@@ -323,6 +346,19 @@ int main()
 			}
 			break;
 	     }
+
+		case 8:
+		{
+			cout << "  " << endl;
+			string name;
+			cout << "Введите имя: " << name;
+			cin >> name;
+			cout << "  " << endl;
+			for (int i : FindPipeByFilter(group,CheckByName,name))
+				cout << group[i];
+			break;
+			cout << "  " << endl;
+		}
 
 		default:
 		{

@@ -16,7 +16,7 @@ void Menu()
 		<< "  5. Редактировать КС" << endl
 		<< "  6. Сохранить" << endl
 		<< "  7. Загрузить" << endl
-	    << "  8. Найти трубу по имени" << endl
+	    << "  8. Найти трубу или кс" << endl
 		<< "  0. Выход" << endl
 		<< "  Выберите действие: ";
 }
@@ -224,20 +224,58 @@ CompressionStation& SelectCompressionStation(vector<CompressionStation>& gr)
 		return gr[index - 1];
 }
 
-using Filter = bool(*)(const Pipe& p, string param);
+template <typename Tp>
+using Filter = bool(*)(const Pipe& p, Tp param);
 
-bool CheckByName(const Pipe& p, string param)
+bool CheckByNamep(const Pipe& p, string param)
 {
 	return p.name == param;
 }
+bool CheckByRepairp(const Pipe& p, int param)
+{
+	return p.InRepair == param;
+}
 
-vector<int> FindPipeByFilter(const vector<Pipe>& group,Filter f, string name)
+template <typename Tp>
+vector<int> FindPipeByFilter(const vector<Pipe>& group, Filter<Tp> f, Tp param)
 {
 	vector <int> res;
 	int i = 0;
 	for (auto& p : group)
 	{
-		if (f(p,name))
+		if (f(p, param))
+			res.push_back(i);
+		i++;
+	}
+
+	return res;
+}
+
+template <typename Tcs>
+using Filterr = bool(*)(const CompressionStation& cs, Tcs param);
+
+bool CheckByNameCs(const CompressionStation& cs, string param)
+{
+	return cs.name == param;
+}
+
+bool CheckByNumberOfWorkshops(const CompressionStation& cs, double param)
+{
+	double procent;
+	procent = int(cs.NumberOfWorkshopsInOperation*100/ cs.NumberOfWorkshops*100)/100;
+	double itog;
+	itog = 100 - procent;
+	return itog == param;
+}
+
+template<typename Tcs>
+vector<int> FindCsByFilter(const vector<CompressionStation>& groupp, Filterr<Tcs> f, Tcs param)
+{
+	vector <int> res;
+	int i = 0;
+	for (auto& cs : groupp)
+	{
+		if (f(cs, param))
 			res.push_back(i);
 		i++;
 	}
@@ -350,12 +388,62 @@ int main()
 		case 8:
 		{
 			cout << "  " << endl;
-			string name;
-			cout << "Введите имя: " << name;
-			cin >> name;
+			cout << "Вы хотите найти трубу или КС? (1 - Трубу/ 0 - КС) ";
+			int choose;
+			choose = GetCorrectNumber(0, 1);
+			if (choose == 1)
+			{
+				cout << "Найти трубу по названию или по признаку 'в ремонте'? (1 - по названию/ 0 - по признаку 'в ремонте') ";
+				int choice;
+				choice = GetCorrectNumber(0, 1);
+				if (choice == 1)
+				{
+					string name;
+					cout << "Введите имя: " << name;
+					cin >> name;
+					cout << "  " << endl;
+					{
+						for (int i : FindPipeByFilter(group, CheckByNamep, name))
+							cout << group[i];
+					}
+				}
+				if (choice == 0)
+				{
+					int repair;
+					cout << "Вывести трубы, которые в ремонте? (1 - Да/ 0 - Нет) ";
+					cin >> repair;
+					cout << "  " << endl;
+					{
+						for (int i : FindPipeByFilter(group, CheckByRepairp, repair))
+							cout << group[i];
+					}
+				}
+			}
+
+			if (choose == 0)
+			{
+				cout << "Найти КС по названию или по проценту незадействованных цехов? (1 - по названию/ 0 - по цехам) ";
+				int decision;
+				decision = GetCorrectNumber(0, 1);
+				if (decision == 1)
+			 {
+				string name;
+				cout << "Введите имя: " << name;
+				cin >> name;
+				for (int i : FindCsByFilter(groupp, CheckByNameCs, name))
+					cout << groupp[i];
+			 }
+				if (decision == 0)
+				{
+					double cexa = 0;
+					cout << "Введите процент незадействованных цехов: " << cexa;
+					cin >> cexa;
+					cexa = int(cexa * 100) / 100;
+					for (int i : FindCsByFilter(groupp, CheckByNumberOfWorkshops, cexa))
+						cout << groupp[i];
+				}
+		    }
 			cout << "  " << endl;
-			for (int i : FindPipeByFilter(group,CheckByName,name))
-				cout << group[i];
 			break;
 			cout << "  " << endl;
 		}

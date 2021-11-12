@@ -140,7 +140,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CompressionStation.cpp" />
     <ClCompile Include="KamalovaChh.cpp" />
+    <ClCompile Include="Pipe.cpp" />
+    <ClCompile Include="utils.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="CompressionStation.h" />
+    <ClInclude Include="Pipe.h" />
+    <ClInclude Include="utils.h" />
+    <ClInclude Include="utilss.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

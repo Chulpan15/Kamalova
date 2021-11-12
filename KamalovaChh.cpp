@@ -4,7 +4,13 @@
 #include <Windows.h>
 #include <cstdlib>
 #include <vector>
-
+#include <sstream>
+#include "Pipe.h"
+#include "CompressionStation.h"
+#include "utilss.h"
+#include <cstdint>
+#include "stdint.h"
+#include "inttypes.h"
 using namespace std;
 
 void Menu()
@@ -17,39 +23,40 @@ void Menu()
 		<< "  6. Сохранить" << endl
 		<< "  7. Загрузить" << endl
 	    << "  8. Найти трубу или кс" << endl
+	    << "  9. Удалить трубу или кс" << endl
 		<< "  0. Выход" << endl
 		<< "  Выберите действие: ";
 }
 
-int GetCorrectNumber(int min=0, int max= 10000000)
-{
-	int x;
-	while((cin >> x).fail() || x<min || x>max)
-	{
-		cin.clear();
-		cin.ignore(10000, '\n');
-		cout << "Please, type number (" << min << "-" << max << "): ";
-	}
-	return x;
-}
+//int GetCorrectNumber(int min=0, int max= 10000000)
+//{
+//	int x;
+//	while((cin >> x).fail() || x<min || x>max)
+//	{
+//		cin.clear();
+//		cin.ignore(10000, '\n');
+//		cout << "Please, type number (" << min << "-" << max << "): ";
+//	}
+//	return x;
+//}
 
-struct Pipe
-{
-	int id;
-	string name;
-	int diametr;
-	int length;
-	bool InRepair = true;
-};
+//struct Pipe
+//{
+//	int id;
+//	string name;
+//	int diametr;
+//	int length;
+//	bool InRepair = true;
+//};
 
-struct CompressionStation
-{
-	int id;
-    string name;
-	int NumberOfWorkshops;
-	int NumberOfWorkshopsInOperation;
-	int effiency;
-};
+//struct CompressionStation
+//{
+//	int id;
+//    string name;
+//	int NumberOfWorkshops;
+//	int NumberOfWorkshopsInOperation;
+//	int effiency;
+//};
 
 
 Pipe LoadPipe(ifstream& filein)
@@ -151,77 +158,93 @@ void EditCompressionStation(CompressionStation& cs)
 	cout << "Редактирование невозможно";
 }
 
-istream& operator >> (istream& in, Pipe& p)
+void DeletePipe(vector<Pipe>& p)
 {
-	cout << "Please, enter name: ";
-	cin.ignore(10000, '\n');
-	getline(cin, p.name);
-	cout << "Please, enter diametr: ";
-	p.diametr = GetCorrectNumber();
-	cout << "Please, enter length: ";
-	p.length = GetCorrectNumber();
-	cout << "Is pipe in repair? (1 - Yes and 0 - No) ";
-	p.InRepair = GetCorrectNumber(0,1);
-	return in;
+	cout << "Введите индекс трубы: ";
+	 int index = GetCorrectNumber<uint64_t>(1, p.size());
+	auto i = p.cbegin();
+	p.erase(i + index - 1);
+
 }
 
-istream& operator >> (istream& in, CompressionStation& cs)
+void DeleteCompSt(vector<CompressionStation>& cs)
 {
-	cout << "Please, enter name: ";
-	cin.ignore(10000, '\n');
-	getline(cin, cs.name);
-	cout << "Please, enter number of workshops: ";
-	cs.NumberOfWorkshops = GetCorrectNumber();
-	cout << "Please, enter number of active workshops: ";
-	cs.NumberOfWorkshopsInOperation = GetCorrectNumber(0,cs.NumberOfWorkshops);
-	cout << "Please, point out effiency: ";
-	cs.effiency = GetCorrectNumber();
-	return in;
+	cout << "Введите индекс КС: ";
+	int index = GetCorrectNumber<uint64_t>(1u, cs.size());
+	auto i = cs.cbegin();
+	cs.erase(i + index - 1);
 }
+//istream& operator >> (istream& in, Pipe& p)
+//{
+//	cout << "Please, enter name: ";
+//	cin.ignore(10000, '\n');
+//	getline(cin, p.name);
+//	cout << "Please, enter diametr: ";
+//	p.diametr = GetCorrectNumber();
+//	cout << "Please, enter length: ";
+//	p.length = GetCorrectNumber();
+//	cout << "Is pipe in repair? (1 - Yes and 0 - No) ";
+//	p.InRepair = GetCorrectNumber(0,1);
+//	return in;
+//}
+//
+//istream& operator >> (istream& in, CompressionStation& cs)
+//{
+//	cout << "Please, enter name: ";
+//	cin.ignore(10000, '\n');
+//	getline(cin, cs.name);
+//	cout << "Please, enter number of workshops: ";
+//	cs.NumberOfWorkshops = GetCorrectNumber();
+//	cout << "Please, enter number of active workshops: ";
+//	cs.NumberOfWorkshopsInOperation = GetCorrectNumber(0,cs.NumberOfWorkshops);
+//	cout << "Please, point out effiency: ";
+//	cs.effiency = GetCorrectNumber();
+//	return in;
+//}
+//
+//ostream& operator << (ostream& out, const Pipe& p)
+//{
+//	if (p.diametr != 0)
+//	{
+//		out << "Pipe's name: " << p.name << endl;
+//		out << "Pipe's diametr: " << p.diametr << endl;
+//		out << "Pipe's length: " << p.length << endl;
+//		if (p.InRepair == 1)
+//		{
+//			out << "Pipe does not work" << endl;
+//		}
+//		if (p.InRepair == 0)
+//		{
+//			out << "Pipe works" << endl;
+//		}
+//	}
+//	return out;
+//}
+//
+//ostream& operator << (ostream& out, const CompressionStation& cs)
+//{
+//	if (cs.NumberOfWorkshops != 0)
+//	{
+//		out << "Compression Station's name: " << cs.name << endl;
+//		out << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
+//		out << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
+//		out << "Compression Station's effiency: " << cs.effiency << endl;
+//	}
+//	return out;
+//}
 
-ostream& operator << (ostream& out, const Pipe& p)
-{
-	if (p.diametr != 0)
-	{
-		out << "Pipe's name: " << p.name << endl;
-		out << "Pipe's diametr: " << p.diametr << endl;
-		out << "Pipe's length: " << p.length << endl;
-		if (p.InRepair == 1)
-		{
-			out << "Pipe does not work" << endl;
-		}
-		if (p.InRepair == 0)
-		{
-			out << "Pipe works" << endl;
-		}
-	}
-	return out;
-}
-
-ostream& operator << (ostream& out, const CompressionStation& cs)
-{
-	if (cs.NumberOfWorkshops != 0)
-	{
-		out << "Compression Station's name: " << cs.name << endl;
-		out << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
-		out << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
-		out << "Compression Station's effiency: " << cs.effiency << endl;
-	}
-	return out;
-}
-
-Pipe& SelectPipe(vector<Pipe>& g)
+Pipe& SelectPipe(vector<Pipe>& p)
 {
 		cout << "Enter index: ";
-		unsigned int index = GetCorrectNumber(1u, g.size());
-		return g[index - 1];
+	    unsigned int index = GetCorrectNumber<uint64_t>(1, p.size());
+		return p[index - 1];
 }
 
-CompressionStation& SelectCompressionStation(vector<CompressionStation>& gr)
+CompressionStation& SelectCompressionStation(vector<CompressionStation>& cs)
 {
 		cout << "Enter index: ";
-		unsigned int index = GetCorrectNumber(1u, gr.size());
-		return gr[index - 1];
+	    unsigned int index = GetCorrectNumber<uint64_t>(1, cs.size());
+		return cs[index - 1];
 }
 
 template <typename Tp>
@@ -291,11 +314,11 @@ int main()
 	CompressionStation cs = {};
 	vector <Pipe> group;
 	vector <CompressionStation> groupp;
-	while (1)
+ 	while (1)
 	{
 		Menu();
 
-		switch (GetCorrectNumber(0, 8))
+		switch (GetCorrectNumber(0, 9))
 		{
 		case 0:
 		{
@@ -329,7 +352,6 @@ int main()
 			cout << "  " << endl;
 			for (auto& cs: groupp)
 			cout << cs << endl;;
-			cout << "  " << endl;
 			break;
 		}
 
@@ -349,17 +371,20 @@ int main()
 
 		case 6:
 		 {  cout << "  " << endl;
-		 cout << "Proverka" << endl;
 			ofstream fileoutt;
-			fileoutt.open("data.txt", ios::out);
+			string filename;
+			cout << "Введите имя файла: ";
+			cin.ignore(10000, '\n');
+			getline(cin, filename);
+			fileoutt.open(filename + ".txt", ios::out);
 			if (fileoutt.is_open())
-			{ 
-				fileoutt << group.size() << endl;
-				for (Pipe p : group)
-					SavePipeCompSt(fileoutt, p, cs);
-				fileoutt << groupp.size() << endl;
-				for (CompressionStation cs : groupp)
-					SavePipeCompSt(fileoutt, p, cs);
+			{
+					fileoutt << group.size() << endl;
+					for (Pipe p : group)
+						SavePipeCompSt(fileoutt, p, cs);
+					fileoutt << groupp.size() << endl;
+					for (CompressionStation cs : groupp)
+						SavePipeCompSt(fileoutt, p, cs);
 					fileoutt.close();
 			}
 			break;
@@ -369,7 +394,11 @@ int main()
 	     {
 			cout << "  " << endl;
 			ifstream filein;
-			filein.open("data.txt", ios::in);
+			string filenamee;
+			cout << "Введите имя файла: ";
+			cin.ignore(10000, '\n');
+			getline(cin, filenamee);
+			filein.open(filenamee + ".txt", ios::in);
 			if (filein.is_open())
 			{
 			  int count;
@@ -446,6 +475,30 @@ int main()
 			cout << "  " << endl;
 			break;
 			cout << "  " << endl;
+		}
+		case 9:
+		{
+			int vybor;
+			cout << "Вы хотите удалить трубу или кс? (1 - Трубу/0 - Кс) ";
+			cin >> vybor;
+			if (vybor == 1)
+			{
+				if (group.size() > 0)
+				{
+					DeletePipe(group);
+				}
+				else cout << "Доступных труб нет. Введите трубу" << endl;
+			}
+			if (vybor == 0)
+			{
+				if (groupp.size() > 0)
+				{
+					DeleteCompSt(groupp);
+				}
+				else cout << "Доступных компрессорных станций нет. Введите компрессорную станцию" << endl;
+			}
+
+			break;
 		}
 
 		default:

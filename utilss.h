@@ -14,3 +14,4 @@ T GetCorrectNumber(T min = 0, T max = 10000000)
 	}
 	return x;
 }
+

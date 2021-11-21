@@ -144,6 +144,7 @@
     <ClCompile Include="KamalovaChh.cpp" />
     <ClCompile Include="Pipe.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="utilss.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CompressionStation.h" />

@@ -4,14 +4,16 @@
 #include <Windows.h>
 #include <cstdlib>
 #include <vector>
-#include <sstream>
+#include <tuple>
 #include "Pipe.h"
 #include "CompressionStation.h"
 #include "utilss.h"
-#include <cstdint>
-#include "stdint.h"
-#include "inttypes.h"
+#include <unordered_map>
+
 using namespace std;
+
+int pid = 1;
+int csid = 1;
 
 void Menu()
 {
@@ -24,115 +26,76 @@ void Menu()
 		<< "  7. Загрузить" << endl
 	    << "  8. Найти трубу или кс" << endl
 	    << "  9. Удалить трубу или кс" << endl
+	    << "  10. Пакетное редактирование труб" << endl
 		<< "  0. Выход" << endl
 		<< "  Выберите действие: ";
 }
 
-//int GetCorrectNumber(int min=0, int max= 10000000)
-//{
-//	int x;
-//	while((cin >> x).fail() || x<min || x>max)
-//	{
-//		cin.clear();
-//		cin.ignore(10000, '\n');
-//		cout << "Please, type number (" << min << "-" << max << "): ";
-//	}
-//	return x;
-//}
-
-//struct Pipe
-//{
-//	int id;
-//	string name;
-//	int diametr;
-//	int length;
-//	bool InRepair = true;
-//};
-
-//struct CompressionStation
-//{
-//	int id;
-//    string name;
-//	int NumberOfWorkshops;
-//	int NumberOfWorkshopsInOperation;
-//	int effiency;
-//};
-
-
-Pipe LoadPipe(ifstream& filein)
+Pipe& SelectPipe(unordered_map<int, Pipe>& p)
 {
-	Pipe p;
-	string text;
-	filein >> text;
-	if (text == "Pipe")
-	{
-		filein.ignore(10000, '\n');
-		getline(filein, p.name);
-		filein >> p.diametr;
-		filein >> p.length;
-		filein >> p.InRepair;
-	}
-	return p;
+	cout << "Введите идентификатор трубы: ";
+	int id = GetCorrectNumber<uint64_t>(1, p.size());
+	if (p.count(id) == 0)
+		cout << "Ошибка. Трубы с таким идентификатором не существует.";
+	else
+		return p[id];
 }
 
-CompressionStation LoadCompSt(ifstream& filein)
+CompressionStation& SelectCompSt(unordered_map<int, CompressionStation>& cs)
 {
-	CompressionStation cs;
-	string text;
-	filein >> text;
-	if (text == "CompressionStation")
-	{
-	  filein.ignore(10000, '\n');
-	  getline(filein, cs.name);
-	  filein >> cs.NumberOfWorkshops;
-	  filein >> cs.NumberOfWorkshopsInOperation;
-	  filein >> cs.effiency;
-	}
-	return cs;
-}
-void PrintPipeCompSt(const Pipe& p, const CompressionStation& cs)
-{
-	if (p.diametr != 0)
-	{
-		cout << "Pipe's name: " << p.name << endl;
-		cout << "Pipe's diametr: " << p.diametr << endl;
-		cout << "Pipe's length: " << p.length << endl;
-		if (p.InRepair == 1)
-		{
-			cout << "Pipe does not work" << endl;
-		}
-		if (p.InRepair == 0)
-		{
-			cout << "Pipe works" << endl;
-		}
-	}
-	if (cs.NumberOfWorkshops != 0)
-	{
-		cout << "Compression Station's name: " << cs.name << endl;
-		cout << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
-		cout << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
-		cout << "Compression Station's effiency: " << cs.effiency << endl;
-	}
+	cout << "Введите идентификатор трубы: ";
+	int id = GetCorrectNumber<uint64_t>(1, cs.size());
+	if (cs.count(id) == 0)
+		cout << "Ошибка. Трубы с таким идентификатором не существует.";
+	else
+		return cs[id];
 }
 
-void EditPipe(Pipe &p)
+void DeletePipe(unordered_map<int, Pipe>& p)
 {
-	p.InRepair = !p.InRepair;
+	cout << "Введите идентификатор трубы: ";
+	int id = GetCorrectNumber<uint64_t>(1, p.size());
+	if (p.count(id) != 0)
+	{
+		p.erase(id);
+	}
+	else
+		cout << "Произошла ошибка. Не существует трубы с таким идентификатором" << endl;;
 }
 
-void SavePipeCompSt(ofstream& fileoutt, const Pipe& p, const CompressionStation& cs)
+void DeleteCompSt(unordered_map<int, CompressionStation>& cs)
 {
-	if (p.diametr != 0)
+	cout << "Введите индекс КС: ";
+    int id = GetCorrectNumber<uint64_t>(1, cs.size());
+	if (cs.count(id) != 0)
+	{
+		cs.erase(id);
+	}
+	else
+		cout << "Произошла ошибка. Не существует КС с таким идентификатором" << endl;;
+}
+
+void SavePipe(ofstream& fileoutt, const Pipe& p)
+{
+	if (p.pDiametr != 0)
 	{
 		fileoutt << "Pipe" << endl;
-		fileoutt << p.name << endl;
-		fileoutt << p.diametr << endl;
-		fileoutt << p.length << endl;
-		fileoutt << p.InRepair << endl;
+		fileoutt << p.MaxIDpipe << endl;
+		fileoutt << p.pid << endl;
+		fileoutt << p.pName << endl;
+		fileoutt << p.pDiametr << endl;
+		fileoutt << p.pLength << endl;
+		fileoutt << p.pInRepair << endl;
 	}
+}
+
+void SaveCompSt(ofstream& fileoutt, const CompressionStation& cs)
+{
 	if (cs.NumberOfWorkshops != 0)
 	{
 		fileoutt << "CompressionStation" << endl;
+		fileoutt << cs.MaxIDcs << endl;
+		fileoutt << cs.csid << endl;
 		fileoutt << cs.name << endl;
 		fileoutt << cs.NumberOfWorkshops << endl;
 		fileoutt << cs.NumberOfWorkshopsInOperation << endl;
@@ -140,111 +103,30 @@ void SavePipeCompSt(ofstream& fileoutt, const Pipe& p, const CompressionStation&
 	}
 }
 
-void EditCompressionStation(CompressionStation& cs)
+Pipe LoadPipe(ifstream& filein)
 {
-	cout << "Добавить цех или остановить один работающий? (1 - Добавить/ 2 - Остановить):  ";
-	int parametr;
-	parametr = GetCorrectNumber(1, 2);
-	if (parametr == 1 && (cs.NumberOfWorkshopsInOperation < cs.NumberOfWorkshops))
-	{
-		cout << cs.NumberOfWorkshopsInOperation++;
-		return;
-	}
-	if (parametr == 2 && (cs.NumberOfWorkshopsInOperation > 0))
-	{
-		cs.NumberOfWorkshopsInOperation--;
-		return;
-	}
-	cout << "Редактирование невозможно";
+	Pipe p;
+		filein >> p.MaxIDpipe;
+		filein >> p.pid;
+		filein.ignore(10000, '\n');
+		getline(filein, p.pName);
+		filein >> p.pDiametr;
+		filein >> p.pLength;
+		filein >> p.pInRepair;
+	return p;
 }
 
-void DeletePipe(vector<Pipe>& p)
+CompressionStation LoadCompSt(ifstream& filein)
 {
-	cout << "Введите индекс трубы: ";
-	 int index = GetCorrectNumber<uint64_t>(1, p.size());
-	auto i = p.cbegin();
-	p.erase(i + index - 1);
-
-}
-
-void DeleteCompSt(vector<CompressionStation>& cs)
-{
-	cout << "Введите индекс КС: ";
-	int index = GetCorrectNumber<uint64_t>(1u, cs.size());
-	auto i = cs.cbegin();
-	cs.erase(i + index - 1);
-}
-//istream& operator >> (istream& in, Pipe& p)
-//{
-//	cout << "Please, enter name: ";
-//	cin.ignore(10000, '\n');
-//	getline(cin, p.name);
-//	cout << "Please, enter diametr: ";
-//	p.diametr = GetCorrectNumber();
-//	cout << "Please, enter length: ";
-//	p.length = GetCorrectNumber();
-//	cout << "Is pipe in repair? (1 - Yes and 0 - No) ";
-//	p.InRepair = GetCorrectNumber(0,1);
-//	return in;
-//}
-//
-//istream& operator >> (istream& in, CompressionStation& cs)
-//{
-//	cout << "Please, enter name: ";
-//	cin.ignore(10000, '\n');
-//	getline(cin, cs.name);
-//	cout << "Please, enter number of workshops: ";
-//	cs.NumberOfWorkshops = GetCorrectNumber();
-//	cout << "Please, enter number of active workshops: ";
-//	cs.NumberOfWorkshopsInOperation = GetCorrectNumber(0,cs.NumberOfWorkshops);
-//	cout << "Please, point out effiency: ";
-//	cs.effiency = GetCorrectNumber();
-//	return in;
-//}
-//
-//ostream& operator << (ostream& out, const Pipe& p)
-//{
-//	if (p.diametr != 0)
-//	{
-//		out << "Pipe's name: " << p.name << endl;
-//		out << "Pipe's diametr: " << p.diametr << endl;
-//		out << "Pipe's length: " << p.length << endl;
-//		if (p.InRepair == 1)
-//		{
-//			out << "Pipe does not work" << endl;
-//		}
-//		if (p.InRepair == 0)
-//		{
-//			out << "Pipe works" << endl;
-//		}
-//	}
-//	return out;
-//}
-//
-//ostream& operator << (ostream& out, const CompressionStation& cs)
-//{
-//	if (cs.NumberOfWorkshops != 0)
-//	{
-//		out << "Compression Station's name: " << cs.name << endl;
-//		out << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
-//		out << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
-//		out << "Compression Station's effiency: " << cs.effiency << endl;
-//	}
-//	return out;
-//}
-
-Pipe& SelectPipe(vector<Pipe>& p)
-{
-		cout << "Enter index: ";
-	    unsigned int index = GetCorrectNumber<uint64_t>(1, p.size());
-		return p[index - 1];
-}
-
-CompressionStation& SelectCompressionStation(vector<CompressionStation>& cs)
-{
-		cout << "Enter index: ";
-	    unsigned int index = GetCorrectNumber<uint64_t>(1, cs.size());
-		return cs[index - 1];
+	CompressionStation cs;
+	  filein >> cs.MaxIDcs;
+	  filein >> cs.csid;
+	  filein.ignore(10000, '\n');
+	  getline(filein, cs.name);
+	  filein >> cs.NumberOfWorkshops;
+	  filein >> cs.NumberOfWorkshopsInOperation;
+	  filein >> cs.effiency;
+	return cs;
 }
 
 template <typename Tp>
@@ -252,21 +134,21 @@ using Filter = bool(*)(const Pipe& p, Tp param);
 
 bool CheckByNamep(const Pipe& p, string param)
 {
-	return p.name == param;
+	return p.pName == param;
 }
 bool CheckByRepairp(const Pipe& p, int param)
 {
-	return p.InRepair == param;
+	return p.pInRepair == param;
 }
 
 template <typename Tp>
-vector<int> FindPipeByFilter(const vector<Pipe>& group, Filter<Tp> f, Tp param)
+vector<int> FindPipeByFilter(const unordered_map<int, Pipe>& group, Filter <Tp> f, Tp param)
 {
 	vector <int> res;
 	int i = 0;
 	for (auto& p : group)
 	{
-		if (f(p, param))
+		if (f(p.second, param))
 			res.push_back(i);
 		i++;
 	}
@@ -284,21 +166,18 @@ bool CheckByNameCs(const CompressionStation& cs, string param)
 
 bool CheckByNumberOfWorkshops(const CompressionStation& cs, double param)
 {
-	double procent;
-	procent = int(cs.NumberOfWorkshopsInOperation*100/ cs.NumberOfWorkshops*100)/100;
-	double itog;
-	itog = 100 - procent;
-	return itog == param;
+	double procent = ((double)cs.NumberOfWorkshops -(double)cs.NumberOfWorkshopsInOperation)*100 / cs.NumberOfWorkshops;
+	return procent >= param;
 }
 
 template<typename Tcs>
-vector<int> FindCsByFilter(const vector<CompressionStation>& groupp, Filterr<Tcs> f, Tcs param)
+vector<int> FindCsByFilter(const unordered_map<int, CompressionStation>& groupp, Filterr<Tcs> f, Tcs param)
 {
 	vector <int> res;
 	int i = 0;
 	for (auto& cs : groupp)
 	{
-		if (f(cs, param))
+		if (f(cs.second, param))
 			res.push_back(i);
 		i++;
 	}
@@ -306,14 +185,46 @@ vector<int> FindCsByFilter(const vector<CompressionStation>& groupp, Filterr<Tcs
 	return res;
 }
 
+void PacketEditPipe(unordered_map<int, Pipe>& group)
+{
+	cout << " Редактировать все трубы или определенные? (1 - все/2 - определенные): ";
+	if (GetCorrectNumber(1, 2) == 1)
+	{
+		for (auto& p : group)
+			Pipe::EditPipe(p.second);
+	}
+	else
+	{
+		vector <int> vectID;
+		while (true)
+		{
+			cout << "Введите идентификатор трубы, чтобы отредактировать или 0, чтобы завершить: ";
+			int i = GetCorrectNumber(0, Pipe::MaxIDpipe);
+			if (i)
+			{
+				if (group.count(i) == 0)
+					cout << "Произошла ошибка. Труба с таким идентификатором отсутсвует.";
+				else
+					vectID.push_back(i);
+			}
+			else
+				break;
+
+
+			
+		}
+		for (int i : vectID)
+			group[i].pInRepair = !group[i].pInRepair;
+	}
+}
+
 int main()
 {
 	SetConsoleCP(1251);
 	SetConsoleOutputCP(1251);
-	Pipe p = {};
-	CompressionStation cs = {};
-	vector <Pipe> group;
-	vector <CompressionStation> groupp;
+	unordered_map <int, Pipe> group = {};
+	unordered_map <int, CompressionStation> groupp = {};
+
  	while (1)
 	{
 		Menu();
@@ -329,8 +240,9 @@ int main()
 		{
 			Pipe p;
 			cin >> p;
-			group.push_back(p);
+			group.insert({ pid,p });
 			cout << "  " << endl;
+			pid++;
 			break;
 		}
 
@@ -339,7 +251,8 @@ int main()
 			cout << "  " << endl;
 			CompressionStation cs;
 			cin >> cs;
-			groupp.push_back(cs);
+			groupp.insert({ csid,cs });
+			csid++;
 			cout << "  " << endl;
 			break;
 		  }
@@ -347,24 +260,42 @@ int main()
 		case 3:
 		{
 			cout << "  " << endl;
-			for (auto& p:group)
-			cout << p<< endl;;
-			cout << "  " << endl;
-			for (auto& cs: groupp)
-			cout << cs << endl;;
+			if ((group.size() != 0) && (groupp.size() == 0))
+			{
+				for (auto& p: group)
+					cout << p.second <<endl;
+			}
+		    if ((group.size() == 0) && (groupp.size() != 0))
+			{
+				for (auto& cs : groupp)
+					cout << cs.second << endl;
+			}
+			if ((group.size() != 0) && (groupp.size() != 0))
+			{
+				for (auto& p : group)
+					cout << p.second << endl;
+				for (auto& cs : groupp)
+					cout << cs.second << endl;
+			}
 			break;
 		}
 
 		case 4:
 		{
-			EditPipe(SelectPipe(group));
+			if (group.size() > 0)
+			{
+				Pipe::EditPipe(SelectPipe(group));
+			}
 			cout << " " << endl;
 			break;
 		}
 
 		case 5:
 		{
-			EditCompressionStation(SelectCompressionStation(groupp));
+			if (groupp.size() > 0)
+			{
+				CompressionStation::EditCompressionStation(SelectCompSt(groupp));
+			}
 			cout << " " << endl;
 			break;
 		}
@@ -379,14 +310,14 @@ int main()
 			fileoutt.open(filename + ".txt", ios::out);
 			if (fileoutt.is_open())
 			{
-					fileoutt << group.size() << endl;
-					for (Pipe p : group)
-						SavePipeCompSt(fileoutt, p, cs);
-					fileoutt << groupp.size() << endl;
-					for (CompressionStation cs : groupp)
-						SavePipeCompSt(fileoutt, p, cs);
-					fileoutt.close();
+				for (auto& p : group)
+					SavePipe(fileoutt, p.second);
+				for (auto& cs : groupp)
+					SaveCompSt(fileoutt, cs.second);
+				break;
 			}
+			else
+				cout << "Произошла ошибка. Файл не был открыт, попробуйте снова!" << endl;
 			break;
 	     }
 
@@ -395,22 +326,32 @@ int main()
 			cout << "  " << endl;
 			ifstream filein;
 			string filenamee;
+			string text;
 			cout << "Введите имя файла: ";
 			cin.ignore(10000, '\n');
 			getline(cin, filenamee);
 			filein.open(filenamee + ".txt", ios::in);
 			if (filein.is_open())
 			{
-			  int count;
-			  filein >> count;
-			  while(count--)
-			  group.push_back(LoadPipe(filein));
-			  filein >> count;
-			  while (count--)
-			  groupp.push_back(LoadCompSt(filein));
-			  filein.close();
-			  cout << "  "<< endl;
+				while (!filein.eof())
+				{
+					getline(filein, text);
+					{
+						if (text == "Pipe")
+						group.insert({ pid,LoadPipe(filein) });
+						pid++;
+					}
+					if (text == "CompressionStation")
+					{
+						groupp.insert({ csid,LoadCompSt(filein) });
+						csid++;
+					}
+				}
+				break;
+				cout << "  " << endl;
 			}
+			else
+				cout << "Произошла ошибка, не удалось открыть файл, попробуйте снова!";
 			break;
 	     }
 
@@ -454,6 +395,7 @@ int main()
 				cout << "Найти КС по названию или по проценту незадействованных цехов? (1 - по названию/ 0 - по цехам) ";
 				int decision;
 				decision = GetCorrectNumber(0, 1);
+				cout << "  " << endl;
 				if (decision == 1)
 			 {
 				string name;
@@ -462,14 +404,21 @@ int main()
 				for (int i : FindCsByFilter(groupp, CheckByNameCs, name))
 					cout << groupp[i];
 			 }
+				cout << "  " << endl;
 				if (decision == 0)
 				{
-					double cexa = 0;
-					cout << "Введите процент незадействованных цехов: " << cexa;
-					cin >> cexa;
-					cexa = int(cexa * 100) / 100;
-					for (int i : FindCsByFilter(groupp, CheckByNumberOfWorkshops, cexa))
+					double procent;
+					cout << "Введите процент незадействованных цехов: ";
+					cin >> procent;
+					while (procent < 0.0 || procent > 100.0)
+					{
+						cin.clear();
+						cin.ignore(10000, '\n');
+						cout << "Ошибка, попробуйте еще раз. Введите число (0 - 100)";
+					}
+					for (int i : FindCsByFilter(groupp, CheckByNumberOfWorkshops, procent))
 						cout << groupp[i];
+					cout << "  " << endl;
 				}
 		    }
 			cout << "  " << endl;
@@ -499,6 +448,10 @@ int main()
 			}
 
 			break;
+		}
+		case 10:
+		{
+			PacketEditPipe(group);
 		}
 
 		default:

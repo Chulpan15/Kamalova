@@ -1,6 +1,7 @@
 #pragma once
 #include <iostream>
 #include <string>
+#include <tuple>
 
 template <typename T>
 T GetCorrectNumber(T min = 0, T max = 10000000)

@@ -1,19 +1,24 @@
 #include "Pipe.h"
 #include "utilss.h"
-#include <unordered_map>
 
 using namespace std;
 
-int Pipe::MaxIDpipe = 0;
+int Pipe::MaxIDPipe = 0;
 
-Pipe::Pipe()
+
+int Pipe::GetId() const
 {
-	pid = ++ MaxIDpipe;
+	return id;
 }
 
+void Pipe::SetId()
+{
+	id = ++MaxIDPipe;
+}
 
 istream& operator >> (istream& in, Pipe& p)
 {
+	p.SetId();
 	cout << "Please, enter name: ";
 	cin.ignore(10000, '\n');
 	getline(cin, p.pName);
@@ -30,7 +35,7 @@ ostream& operator << (ostream& out, const Pipe& p)
 {
 	if (p.pDiametr != 0)
 	{
-		out << "Pipe's identificator: " << p.pid << endl;
+		out << "Pipe's identificator: " << p.id << endl;
 		out << "Pipe's name: " << p.pName << endl;
 		out << "Pipe's diametr: " << p.pDiametr << endl;
 		out << "Pipe's length: " << p.pLength << endl;
@@ -46,8 +51,29 @@ ostream& operator << (ostream& out, const Pipe& p)
 	return out;
 }
 
+std::ifstream& operator >> (std::ifstream& in, Pipe& p)
+{
+	in >> p.id;
+	in >> p.pName;
+	in >> p.pDiametr;
+	in >> p.pLength;
+	in >> p.pInRepair;
+	return in;
+}
 
-void Pipe::EditPipe(Pipe& p)
+std::ofstream& operator << (std::ofstream& out, const Pipe& p)
+{
+	out << p.GetId() << endl
+		<< p.pName << endl
+		<< p.pDiametr << endl
+		<< p.pLength << endl
+		<< p.pInRepair << endl;
+	return out;
+}
+
+
+ void Pipe::EditPipe(Pipe& p)
 {
   p.pInRepair = !p.pInRepair;	
 }
+

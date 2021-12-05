@@ -1,17 +1,44 @@
 #include "CompressionStation.h"
 #include "utilss.h"
-#include <unordered_map>
 using namespace std;
 
-int CompressionStation::MaxIDcs = 0;
+int CompressionStation::MaxIDCs = 0;
 
-CompressionStation::CompressionStation()
+
+int CompressionStation::GetID() const
 {
-	csid = ++MaxIDcs;
+	return id;
+}
+
+void CompressionStation::SetID()
+{
+	id = ++MaxIDCs;
+}
+
+
+int CompressionStation::GetNumberOfWorkshops() const
+{
+	return NumberOfWorkshops;
+}
+
+void CompressionStation::SetNumberOfWorkshops()
+{
+	NumberOfWorkshops = GetCorrectNumber(0, 10000000);
+}
+
+int CompressionStation::GetNumberOfWorkshopsInOperation() const
+{
+	return NumberOfWorkshopsInOperation;
+}
+
+void CompressionStation::SetNumberOfWorkshopsInOperation()
+{
+	NumberOfWorkshopsInOperation = GetCorrectNumber(0, 10000000);
 }
 
 istream& operator >> (istream& in, CompressionStation& cs)
 {
+	cs.id;
 	cout << "Please, enter name: ";
 	cin.ignore(10000, '\n');
 	getline(cin, cs.name);
@@ -28,12 +55,31 @@ ostream& operator << (ostream& out, const CompressionStation& cs)
 {
 	if (cs.NumberOfWorkshops != 0)
 	{
-		out << "Compression Station's identificator: " << cs.csid << endl;
 		out << "Compression Station's name: " << cs.name << endl;
 		out << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
 		out << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
 		out << "Compression Station's effiency: " << cs.effiency << endl;
 	}
+	return out;
+}
+
+std::ifstream& operator >> (std::ifstream& in, CompressionStation& cs)
+{
+	in >> cs.id;
+	in >> cs.name;
+	in >> cs.NumberOfWorkshops;
+	in >> cs.NumberOfWorkshopsInOperation;
+	in >> cs.effiency;
+	return in;
+}
+
+std::ofstream& operator << (std::ofstream& out, const CompressionStation& cs)
+{
+	out << cs.id << endl
+		<< cs.name << endl
+		<< cs.NumberOfWorkshops << endl
+		<< cs.NumberOfWorkshopsInOperation << endl
+		<< cs.effiency << endl;
 	return out;
 }
 

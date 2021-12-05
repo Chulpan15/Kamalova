@@ -72,39 +72,51 @@ void DeleteCompSt(unordered_map<int, CompressionStation>& cs)
 		cout << "Произошла ошибка. Не существует КС с таким идентификатором" << endl;;
 }
 
-void LoadPipe(ifstream& filein, unordered_map <int, Pipe>& group)
+void Load(ifstream& filein, unordered_map<int, Pipe>& group, unordered_map<int, CompressionStation>& groupp)
 {
-	    Pipe p;
-	    int kol = 0;
-		int pipe_kol;
-		filein >> pipe_kol;
-		for (int i = 1; i <= pipe_kol; i++)
+	Pipe p;
+	CompressionStation cs;
+	int i = 0;
+	int kol_pipe;
+	filein >> kol_pipe;
+	while (kol_pipe != 0)
+	{
+		filein >> p;
+		for (auto& [id, pipe] : group)
 		{
-			filein >> p;
-			for (auto& [id, p] : group)
-			{
-				if (p.GetId() == id)
-				{
-					kol++;
-				}
-			}
-			if (kol == 0)
-			{
-				p.MaxIDPipe++;
-				group.emplace(p.MaxIDPipe, p);
-			}
-			else
-			{
-				kol = 0;
-			}
+			if (p.GetId() == id)
+				i++;
 		}
-}
+		if (i == 0)
+		{
+			p.MaxIDPipe++;
+			group.emplace(p.MaxIDPipe, p);
+		}
+		else
+			i = 0;
+		--kol_pipe;
+	}
 
-void LoadCompSt(ifstream& filein, unordered_map <int, CompressionStation>& groupp)
-{
-	    CompressionStation cs;
+	int j = 0;
+	int kol_cs;
+	filein >> kol_cs;
+	while (kol_cs != 0)
+	{
 		filein >> cs;
-		groupp.emplace(groupp.size() + 1, cs);
+		for (auto& [id, compst] : groupp)
+		{
+			if (cs.GetID() == id)
+				j++;
+		}
+		if (j == 0)
+		{
+			cs.MaxIDCs++;
+			groupp.emplace(cs.MaxIDCs, cs);
+		}
+		else
+			j = 0;
+		--kol_cs;
+	}
 }
 
 template <typename Tp>
@@ -294,7 +306,6 @@ int main()
 
 		case 1:
 		{
-			//Pipe p;
 			cin >> p;
 			group.emplace(p.MaxIDPipe, p);
 			cout << "  " << endl;
@@ -303,7 +314,6 @@ int main()
 
 		case 2:
 		 {
-			//CompressionStation cs;
 			cout << "  " << endl;
 			cin >> cs;
 			groupp.emplace(cs.MaxIDCs, cs);
@@ -316,19 +326,19 @@ int main()
 			cout << "  " << endl;
 			if (group.size() != 0)
 			{
-				for (const auto& [id, pp] : group)
+				for (const auto& [id, p] : group)
 				{
-					//cout << id;
-					cout << pp << endl;
+					cout << id;
+					cout << p << endl;
 				}
 			}
 			else cout << "Нет данных по трубам" << endl;
 			if (groupp.size() != 0)
 			{
-				for (const auto& [id, c] : groupp)
+				for (const auto& [id, cs] : groupp)
 				{
-					//cout << id;
-					cout << c << endl;
+					cout << id;
+					cout << cs << endl;
 				}
 			}
 			else
@@ -392,7 +402,7 @@ int main()
 
 			if (filein.is_open())
 			{
-				LoadPipe(filein, group);
+				Load(filein, group, groupp);
 				filein.close();
 			}
 

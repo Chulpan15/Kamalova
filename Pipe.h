@@ -15,6 +15,7 @@ public:
 	int pLength;
 	bool pInRepair;
 
+
 	int GetId() const;
 	void SetId();
 

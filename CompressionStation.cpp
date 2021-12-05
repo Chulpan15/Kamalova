@@ -38,7 +38,7 @@ void CompressionStation::SetNumberOfWorkshopsInOperation()
 
 istream& operator >> (istream& in, CompressionStation& cs)
 {
-	cs.id;
+	cs.SetID();
 	cout << "Please, enter name: ";
 	cin.ignore(10000, '\n');
 	getline(cin, cs.name);
@@ -55,6 +55,7 @@ ostream& operator << (ostream& out, const CompressionStation& cs)
 {
 	if (cs.NumberOfWorkshops != 0)
 	{
+		out << "Compression Station's identificator: " << cs.id << endl;
 		out << "Compression Station's name: " << cs.name << endl;
 		out << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
 		out << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
@@ -75,10 +76,10 @@ std::ifstream& operator >> (std::ifstream& in, CompressionStation& cs)
 
 std::ofstream& operator << (std::ofstream& out, const CompressionStation& cs)
 {
-	out << cs.id << endl
+	out << cs.GetID() << endl
 		<< cs.name << endl
-		<< cs.NumberOfWorkshops << endl
-		<< cs.NumberOfWorkshopsInOperation << endl
+		<< cs.GetNumberOfWorkshops() << endl
+		<< cs.GetNumberOfWorkshopsInOperation() << endl
 		<< cs.effiency << endl;
 	return out;
 }

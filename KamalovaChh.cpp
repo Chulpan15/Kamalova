@@ -154,8 +154,7 @@ bool CheckByNameCs(const CompressionStation& cs, string param)
 
 bool CheckByNumberOfWorkshops(const CompressionStation& cs, double param)
 {
-	double procent = ((double)cs.GetNumberOfWorkshops() -(double)cs.GetNumberOfWorkshops())*100 / cs.GetNumberOfWorkshops();
-	return procent >= param;
+	return ((cs.GetNumberOfWorkshops() - cs.GetNumberOfWorkshopsInOperation()) / cs.GetNumberOfWorkshops()) * 100 == param;
 }
 
 template<typename Tcs>
@@ -174,10 +173,6 @@ vector<int> FindCsByFilter(const unordered_map<int, CompressionStation>& groupp,
 
 void PacketEditPipe(unordered_map<int, Pipe>& group)
 {
-	cout << "Редактировать трубы или удалить? (1 - редактировать/2 - удалить): ";
-	{
-		if (GetCorrectNumber(1, 2) == 1)
-		{
 			cout << " Редактировать все трубы или определенные? (1 - все/2 - определенные): ";
 			if (GetCorrectNumber(1, 2) == 1)
 			{
@@ -190,7 +185,7 @@ void PacketEditPipe(unordered_map<int, Pipe>& group)
 				while (true)
 				{
 					cout << "Введите идентификатор трубы, чтобы отредактировать или 0, чтобы завершить: ";
-					int i = GetCorrectNumber(0, (int)group.size());
+					int i = GetCorrectNumber(0, Pipe::MaxIDPipe);
 					if (i)
 					{
 						if (group.count(i) == 0)
@@ -205,83 +200,53 @@ void PacketEditPipe(unordered_map<int, Pipe>& group)
 				for (int i : vectID)
 					group[i].pInRepair = !group[i].pInRepair;
 			}
+}
+
+void PacketDeletePipe(unordered_map<int, Pipe>& p)
+{
+	    cout << "Удалить трубы, которые (0 - работающие ; 1 - находятся в ремонте):  ";
+		int status = GetCorrectNumber(0, 1);
+		vector <int> vectID = FindPipeByFilter(p, CheckByRepairp, status);
+		for (auto& id : vectID)
+			cout << id << p[id] << endl;
+
+		cout << "Удалить все трубы - 1 / удалить определенные - 2: ";
+		if (GetCorrectNumber(1, 2) == 1)
+		{
+			for (auto& id : vectID)
+				p.erase(id);
 		}
 		else
 		{
-			cout << "Удалить работающие или неработающие трубы? (1 - работающие/0 - неработающие): ";
-			if (GetCorrectNumber(0, 1) == 1)
+			while (true)
 			{
-				for (int i : FindPipeByFilter(group, CheckByRepairp, 1))
+				int i = 0;
+				int pid;
+				cout << "Введите идентификатор трубы, чтобы удалить или 0, чтобы завершить операцию: ";
+				cin >> pid;
+				if (pid)
 				{
-
-					cout << "Удалить все трубы или определенные? (1 - все/2 - определенные): ";
-					if (GetCorrectNumber(1, 2) == 1)
+					for (auto& id : vectID)
 					{
-						for (int i : FindPipeByFilter(group, CheckByRepairp, 1))
-							group.erase(i);
+						if (pid == id)
+						{
+							i++;
+						}
+					}
+					if (i == 0)
+					{
+						cout << "Ошибка!";
 					}
 					else
 					{
-						vector <int> vectID;
-						while (true)
-						{
-							cout << "Введите идентификатор трубы, чтобы удалить или 0, чтобы завершить: ";
-							int i = GetCorrectNumber(0, (int)group.size());
-							if (i)
-							{
-								if (group.count(i) == 0)
-									cout << "Произошла ошибка. Труба с таким идентификатором отсутсвует.";
-								else
-									vectID.push_back(i);
-							}
-							else
-								break;
-
-						}
-						for (int i : vectID)
-						{
-							group.erase(i);
-						}
+						p.erase(pid);
 					}
-				}
-			}
-			else
-			{
-				for (int i : FindPipeByFilter(group, CheckByRepairp, 0));
-				cout << "Удалить все трубы или определенные? (1 - все/2 - определенные): ";
-				if (GetCorrectNumber(1, 2) == 1)
-				{
-					for (int i : FindPipeByFilter(group, CheckByRepairp, 1))
-						group.erase(i);
 				}
 				else
-				{
-					vector <int> vectID;
-					while (true)
-					{
-						cout << "Введите идентификатор трубы, чтобы удалить или 0, чтобы завершить: ";
-						int i = GetCorrectNumber(0, (int)group.size());
-						if (i)
-						{
-							if (group.count(i) == 0)
-								cout << "Произошла ошибка. Труба с таким идентификатором отсутсвует.";
-							else
-								vectID.push_back(i);
-						}
-						else
-							break;
-
-					}
-					for (int i : vectID)
-					{
-						group.erase(i);
-					}
-				}
-
+					break;
 			}
-
 		}
-	}
+	
 }
 
 int main()
@@ -328,7 +293,7 @@ int main()
 			{
 				for (const auto& [id, p] : group)
 				{
-					cout << id;
+					//cout << id;
 					cout << p << endl;
 				}
 			}
@@ -337,7 +302,7 @@ int main()
 			{
 				for (const auto& [id, cs] : groupp)
 				{
-					cout << id;
+					//cout << id;
 					cout << cs << endl;
 				}
 			}
@@ -509,7 +474,17 @@ int main()
 		}
 		case 10:
 		{
-			PacketEditPipe(group);
+			cout << "Хотите отредактировать трубы - 1/Хотите удалить - 2: ";
+			int choice;
+			choice = GetCorrectNumber(1, 2);
+			if (choice == 1)
+			{
+				PacketEditPipe(group);
+			}
+			else
+			{
+				PacketDeletePipe(group);
+			}
 			break;
 		}
 

@@ -8,6 +8,7 @@
 #include "CompressionStation.h"
 #include "utilss.h"
 #include <unordered_map>
+#include <set>
 
 using namespace std;
 
@@ -154,7 +155,7 @@ bool CheckByNameCs(const CompressionStation& cs, string param)
 
 bool CheckByNumberOfWorkshops(const CompressionStation& cs, double param)
 {
-	return ((cs.GetNumberOfWorkshops() - cs.GetNumberOfWorkshopsInOperation()) / cs.GetNumberOfWorkshops()) * 100 == param;
+	return ((cs.GetNumberOfWorkshops() - cs.GetNumberOfWorkshopsInOperation()) / cs.GetNumberOfWorkshops()) * 100 >= param;
 }
 
 template<typename Tcs>
@@ -177,11 +178,11 @@ void PacketEditPipe(unordered_map<int, Pipe>& group)
 			if (GetCorrectNumber(1, 2) == 1)
 			{
 				for (auto& p : group)
-					Pipe::EditPipe(p.second);
+					SelectPipe(group).EditPipe();
 			}
 			else
 			{
-				vector <int> vectID;
+				set <int> vectID;
 				while (true)
 				{
 					cout << "Введите идентификатор трубы, чтобы отредактировать или 0, чтобы завершить: ";
@@ -191,7 +192,7 @@ void PacketEditPipe(unordered_map<int, Pipe>& group)
 						if (group.count(i) == 0)
 							cout << "Произошла ошибка. Труба с таким идентификатором отсутсвует.";
 						else
-							vectID.push_back(i);
+							vectID.insert(i);
 					}
 					else
 						break;
@@ -293,7 +294,6 @@ int main()
 			{
 				for (const auto& [id, p] : group)
 				{
-					//cout << id;
 					cout << p << endl;
 				}
 			}
@@ -302,7 +302,6 @@ int main()
 			{
 				for (const auto& [id, cs] : groupp)
 				{
-					//cout << id;
 					cout << cs << endl;
 				}
 			}
@@ -315,7 +314,7 @@ int main()
 		{
 			if (group.size() > 0)
 			{
-				Pipe::EditPipe(SelectPipe(group));
+				SelectPipe(group).EditPipe();
 			}
 			cout << " " << endl;
 			break;

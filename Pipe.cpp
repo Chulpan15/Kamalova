@@ -72,8 +72,8 @@ std::ofstream& operator << (std::ofstream& out, const Pipe& p)
 }
 
 
- void Pipe::EditPipe(Pipe& p)
+ void Pipe::EditPipe()
 {
-  p.pInRepair = !p.pInRepair;	
+  pInRepair = !pInRepair;	
 }
 

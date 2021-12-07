@@ -20,7 +20,7 @@ public:
 	void SetId();
 
 
-	static void EditPipe(Pipe& p);
+	void EditPipe();
 	friend std::istream& operator >> (std::istream& in, Pipe& p);
 	friend std::ostream& operator << (std::ostream& out, const Pipe& p);
 	friend std::ifstream& operator >> (std::ifstream& in, Pipe& p);

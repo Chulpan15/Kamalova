@@ -16,6 +16,8 @@ public:
 	std::string name;
 	int effiency;
 	static int MaxIDCs;
+	int STisxoda = 0;
+	int STzaxoda = 0;
 
 	int GetID() const;
 	void SetID();

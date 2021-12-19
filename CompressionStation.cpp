@@ -48,6 +48,8 @@ istream& operator >> (istream& in, CompressionStation& cs)
 	cs.NumberOfWorkshopsInOperation = GetCorrectNumber(0, cs.NumberOfWorkshops);
 	cout << "Please, point out effiency: ";
 	cs.effiency = GetCorrectNumber(1,10000000);
+	cs.STisxoda = 0;
+	cs.STzaxoda = 0;
 	return in;
 }
 
@@ -60,6 +62,8 @@ ostream& operator << (ostream& out, const CompressionStation& cs)
 		out << "Compression Station's number of workshops: " << cs.NumberOfWorkshops << endl;
 		out << "Compression Station's number of workshops in operation: " << cs.NumberOfWorkshopsInOperation << endl;
 		out << "Compression Station's effiency: " << cs.effiency << endl;
+		out << "Compression Station's degree of outcome: " << cs.STisxoda<< endl;
+		out << "Compression Station' degeree of income: " << cs.STzaxoda <<endl;
 	}
 	return out;
 }
@@ -71,6 +75,8 @@ std::ifstream& operator >> (std::ifstream& in, CompressionStation& cs)
 	in >> cs.NumberOfWorkshops;
 	in >> cs.NumberOfWorkshopsInOperation;
 	in >> cs.effiency;
+	in >> cs.STisxoda;
+	in >> cs.STzaxoda;
 	return in;
 }
 
@@ -80,7 +86,9 @@ std::ofstream& operator << (std::ofstream& out, const CompressionStation& cs)
 		<< cs.name << endl
 		<< cs.GetNumberOfWorkshops() << endl
 		<< cs.GetNumberOfWorkshopsInOperation() << endl
-		<< cs.effiency << endl;
+		<< cs.effiency << endl
+		<< cs.STisxoda << endl
+		<< cs.STzaxoda << endl;
 	return out;
 }
 

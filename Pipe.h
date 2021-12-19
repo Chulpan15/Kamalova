@@ -14,6 +14,8 @@ public:
 	int pDiametr;
 	int pLength;
 	bool pInRepair;
+	int CSout;
+	int CSin;
 
 
 	int GetId() const;

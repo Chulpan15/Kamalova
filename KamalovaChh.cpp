@@ -25,6 +25,7 @@ void Menu()
 	    << "  8. Найти трубу или кс" << endl
 	    << "  9. Удалить трубу или кс" << endl
 	    << " 10. Пакетное редактирование труб" << endl
+	    << " 11. Газотранспортная система" << endl
 		<< "  0. Выход" << endl
 		<< "  Выберите действие: ";
 }
@@ -250,6 +251,71 @@ void PacketDeletePipe(unordered_map<int, Pipe>& p)
 	
 }
 
+void Connect(unordered_map<int, Pipe>& group,unordered_map<int, CompressionStation>& groupp)
+{
+	if ((group.size() > 0) && (groupp.size() > 0))
+	{
+		int IDpipeConnect = Proverka(group, "Введите id трубы, чтобы прикрепить: ", "Ошибка! Попробуйте снова!", 1, Pipe::MaxIDPipe, 0);
+		if (group[IDpipeConnect].CSin == 0 && group[IDpipeConnect].CSout == 0)
+		{
+			int IDout = Proverka(groupp, "Введите id Компрессорной станции, из которой будет выходить труба: ", "Ошибка! Попробуйте снова!", 1, CompressionStation::MaxIDCs, 0);
+			int IDin = Proverka(groupp, "Введите id Компрессорной станции, в которую будет входить труба: ", "Ошибка! Попробуйте снова!", 1, CompressionStation::MaxIDCs, IDout);
+			group[IDpipeConnect].CSin = IDin;
+			group[IDpipeConnect].CSout = IDout;
+			groupp[IDin].STzaxoda += 1;
+			groupp[IDout].STisxoda += 1;
+		}
+		else
+		{
+			cout << "Труба уже подключена";
+		}
+	}
+	else
+	{
+		cout << "Недостаточно труб и компрессорных станций, чтобы создать подключение";
+	}
+}
+
+void PrintSystem(unordered_map<int, Pipe>& group)
+{
+	for (auto& p : group)
+	{
+		if (p.second.CSin > 0 && p.second.CSout> 0)
+		{
+			cout << "\nPipe's ID: " << p.first << endl;
+			cout << "Pipe is connected" << endl;
+			cout << "CS's IDout: " << p.second.CSout << endl;
+			cout << "CS's IDin: " << p.second.CSin << endl;
+		}
+		else
+		{
+			cout << "\nPipe's ID: " << p.first << endl;
+			cout << "Pipe isn't connected" << endl;
+		}
+	}
+}
+
+void Disconnect(unordered_map<int, Pipe>& group, unordered_map<int, CompressionStation>& groupp)
+{
+	if (group.size() > 0)
+	{
+		int IDpipeDisconnect = Proverka(group, "Введите id трубы, которую хотите отсоединить: ", "Произошла ошибка, попробуйте снова!", 1, Pipe::MaxIDPipe, 0);
+		if (group[IDpipeDisconnect].CSin == 0)
+		{
+			cout << "Труба не подключена" << endl;
+		}
+		else
+		{
+			group[IDpipeDisconnect].CSin = 0;
+			group[IDpipeDisconnect].CSout = 0;
+			groupp[group[IDpipeDisconnect].CSin].STzaxoda -= 1;
+			groupp[group[IDpipeDisconnect].CSout].STisxoda -= 1;
+		}
+	}
+	else
+		cout << "Отсутствует труба";
+}
+
 int main()
 {
 	SetConsoleCP(1251);
@@ -263,7 +329,7 @@ int main()
 	{
 		Menu();
 
-		switch (GetCorrectNumber(0, 10))
+		switch (GetCorrectNumber(0, 11))
 		{
 		case 0:
 		{
@@ -483,6 +549,38 @@ int main()
 			else
 			{
 				PacketDeletePipe(group);
+			}
+			break;
+		}
+
+		case 11:
+		{
+			cin.clear();
+			system("cls");
+			cout << "Вы хотите: [1] - Подсоединить КС к трубам; [2] - показать существующие соединения; [3] - отсоединить КС от труб: ";
+			switch (GetCorrectNumber(1, 3))
+			{
+			case 1:
+			{
+				cin.clear();
+				system("cls");
+				Connect(group, groupp);
+				break;
+			}
+			case 2:
+			{
+				cin.clear();
+				system("cls");
+				PrintSystem(group);
+				break;
+			}
+			case 3:
+			{
+				cin.clear();
+				system("cls");
+				Disconnect(group, groupp);
+				break;
+			}
 			}
 			break;
 		}

@@ -54,12 +54,11 @@ void DeletePipe(unordered_map<int, Pipe>& p)
 {
 	cout << "Введите идентификатор трубы: ";
 	int id = GetCorrectNumber<uint64_t>(1, p.size());
-	if (p.count(id) != 0)
-	{
-		p.erase(id);
-	}
-	else
-		cout << "Произошла ошибка. Не существует трубы с таким идентификатором" << endl;;
+	if (p.count(id) == 0)
+		cout << "Ошибка! Не существует трубы с таким идентификатором\n";
+	else if (p[id].CSin != 0)
+		cout << "Ошибка! Данная труба находится в работе!" << endl;
+	else p.erase(id);
 }
 
 void DeleteCompSt(unordered_map<int, CompressionStation>& cs)
@@ -282,15 +281,15 @@ void PrintSystem(unordered_map<int, Pipe>& group)
 	{
 		if (p.second.CSin > 0 && p.second.CSout> 0)
 		{
-			cout << "\nPipe's ID: " << p.first << endl;
-			cout << "Pipe is connected" << endl;
+			cout << "\nИдентификатор трубы: " << p.first << endl;
+			cout << "Труба подключена" << endl;
 			cout << "CS's IDout: " << p.second.CSout << endl;
 			cout << "CS's IDin: " << p.second.CSin << endl;
 		}
 		else
 		{
-			cout << "\nPipe's ID: " << p.first << endl;
-			cout << "Pipe isn't connected" << endl;
+			cout << "\nИдентификатор трубы: " << p.first << endl;
+			cout << "Труба не подключена" << endl;
 		}
 	}
 }
@@ -314,6 +313,96 @@ void Disconnect(unordered_map<int, Pipe>& group, unordered_map<int, CompressionS
 	}
 	else
 		cout << "Отсутствует труба";
+}
+
+void sort(unordered_map<int, Pipe> group, unordered_map<int, CompressionStation> groupp, vector<int>& tops, vector<int>& edges, vector <int>& result)
+{
+	int cycleschet = 0;
+	int deletedpoints = 0;
+
+	vector <int> markedtops;           //пройденные вершины
+	vector <int> markededges;          //пройденные ребра
+	markedtops.clear();
+
+	bool flag;
+
+	for (auto& cs : tops)
+	{
+		flag = false;
+		markededges.clear();
+		if (groupp[cs].STzaxoda == 0 && groupp[cs].STisxoda != 0)
+		{
+			for (auto& p : edges)
+			{
+				if (group[p].CSout == cs)
+				{
+					markededges.push_back(p);
+				}
+			}
+			flag = true;
+			for (const auto& p : markededges)
+			{
+				groupp[group[p].CSin].STzaxoda -= 1;
+				groupp[group[p].CSout].STisxoda -= 1;
+				group[p].CSin = 0;
+				group[p].CSout = 0;
+				edges.erase(find(edges.begin(), edges.end(), p));
+			}
+			deletedpoints += 1;
+			markedtops.push_back(cs);
+		}
+		if (groupp[cs].STzaxoda != 0 && groupp[cs].STisxoda != 0)
+		{
+			cycleschet += 1;
+		}
+		if (groupp[cs].STzaxoda == 0 && groupp[cs].STisxoda == 0 && flag == false)
+		{
+			markedtops.push_back(cs);
+		}
+	}
+	for (const auto& cs : markedtops)
+	{
+		result.push_back(cs);
+		tops.erase(std::find(tops.begin(), tops.end(), cs));
+	}
+	if (deletedpoints == 0 || cycleschet == size(tops) || tops.empty())
+	{
+		return;
+	}
+	sort(group, groupp, tops, edges, result);
+}
+
+void TopologicalSort(unordered_map<int, Pipe> group, unordered_map<int, CompressionStation> groupp)
+{
+	vector <int> result;
+	vector <int> tops;                //вершины графа
+	vector <int> edges;               //ребра графа
+	for (auto& cs : groupp)
+	{
+		if (cs.second.STisxoda != 0 || cs.second.STzaxoda != 0)
+			tops.push_back(cs.first);
+	}
+	for (auto& p : group)
+	{
+		if (p.second.CSin != 0)
+			edges.push_back(p.first);
+	}
+
+	int check = size(tops);
+	sort(group, groupp, tops, edges, result);
+	if (!result.empty() && check == size(result))
+	{
+		std::cout << "Граф отсортирован" << endl
+			<< "Топологическая сортировка: " << endl;
+		for (const auto cs : result)
+		{
+			std::cout << cs << endl;
+		}
+	}
+	else
+	{
+		std::cout << "Произошла ошибка! Невозможно отсортировать граф, так как в нем присутствует цикл" << endl;
+	}
 }
 
 int main()
@@ -555,30 +644,27 @@ int main()
 
 		case 11:
 		{
-			cin.clear();
-			system("cls");
-			cout << "Вы хотите: [1] - Подсоединить КС к трубам; [2] - показать существующие соединения; [3] - отсоединить КС от труб: ";
-			switch (GetCorrectNumber(1, 3))
+			cout << "Вы хотите: [1] - Подсоединить КС к трубам; [2] - показать существующие соединения; [3] - отсоединить КС от труб: ; [4] - топологическая сортировка: ";
+			switch (GetCorrectNumber(1, 4))
 			{
 			case 1:
 			{
-				cin.clear();
-				system("cls");
 				Connect(group, groupp);
 				break;
 			}
 			case 2:
 			{
-				cin.clear();
-				system("cls");
 				PrintSystem(group);
 				break;
 			}
 			case 3:
 			{
-				cin.clear();
-				system("cls");
 				Disconnect(group, groupp);
+				break;
+			}
+			case 4:
+			{
+				TopologicalSort(group, groupp);
 				break;
 			}
 			}
